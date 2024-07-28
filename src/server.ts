@@ -1,7 +1,19 @@
 import fastify from "fastify";
+import cors from "@fastify/cors";
 import { prisma } from "./lib/prisma";
+import fastifyJwt from "@fastify/jwt";
+import fastifyBcrypt from "fastify-bcrypt";
 
 const app = fastify();
+app.register(fastifyJwt, {
+  secret: "supersecret",
+});
+app.register(fastifyBcrypt);
+
+app.register(cors, {
+  origin: "http://localhost:5173",
+});
+
 app.get("/", async (request, reply) => {
   return { hello: "world" };
 });
@@ -12,11 +24,12 @@ app.listen({ port: 3333 }).then(() => {
 
 app.post("/users", async (request, reply) => {
   const { email, username, password } = request.body;
+  const hashedPassword = await app.bcrypt.hash(password);
   const user = await prisma.user.create({
     data: {
       email,
       username,
-      password,
+      password: hashedPassword,
     },
   });
   reply.send(user);

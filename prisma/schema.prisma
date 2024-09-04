@@ -11,9 +11,43 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
-  username String   @unique
+  id       String  @id @default(uuid())
+  email    String  @unique
+  username String  @unique
   password String
+  isAdmin  Boolean @default(false)
+
+  Votes Votes[]
 }
 
+model Category {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  weight      Int
+
+  nominees Nominee[]
+  Votes    Votes[]
+}
+
+model Nominee {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  developer   String
+  genre       String
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  Votes Votes[]
+}
+
+model Votes {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  categoryId Int
+  nomineeId  Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nominee    Nominee  @relation(fields: [nomineeId], references: [id], onDelete: Cascade)
+}

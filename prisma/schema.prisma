@@ -6,11 +6,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Users {
   id       String  @id @default(uuid())
   email    String  @unique
   username String  @unique
@@ -20,26 +20,28 @@ model User {
   Votes Votes[]
 }
 
-model Category {
+model Categories {
   id          Int    @id @default(autoincrement())
   title       String
   description String
   weight      Int
 
-  nominees Nominee[]
+  nominees Nominees[]
   Votes    Votes[]
+  Winners  Winners[]
 }
 
-model Nominee {
+model Nominees {
   id          Int      @id @default(autoincrement())
   name        String
   description String
   developer   String
   genre       String
   categoryId  Int
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category    Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
-  Votes Votes[]
+  Votes   Votes[]
+  Winners Winners[]
 }
 
 model Votes {
@@ -47,7 +49,15 @@ model Votes {
   userId     String
   categoryId Int
   nomineeId  Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  nominee    Nominee  @relation(fields: [nomineeId], references: [id], onDelete: Cascade)
+  user       Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nominee    Nominees  @relation(fields: [nomineeId], references: [id], onDelete: Cascade)
+}
+
+model Winners {
+  id         Int      @id @default(autoincrement())
+  categoryId Int
+  nomineeId  Int
+  category   Categories @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nominee    Nominees  @relation(fields: [nomineeId], references: [id], onDelete: Cascade)
 }
